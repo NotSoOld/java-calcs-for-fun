@@ -52,12 +52,12 @@ public class InputStatement {
     }
 
     public InputStatement processAndCheck() throws IllegalStatementException {
-        List<String> tokens = tokenize();
+        List<String> meaningfulTokens = tokenize();
 
         Token lastTokenObject = null;
         boolean firstNumberIsNegative = false;
-        for (int i = 0; i < tokens.size(); i++) {
-            String tokenStr = tokens.get(i);
+        for (int i = 0; i < meaningfulTokens.size(); i++) {
+            String tokenStr = meaningfulTokens.get(i);
 
             Token currentTokenObject;
             try {
@@ -75,11 +75,12 @@ public class InputStatement {
             } catch (NumberFormatException ignored) {
                 // It's not a valid number. Than maybe it's an operator (expression)?
                 // In addition, check if the first token is not a number (includes a hack for the negative first number).
-
-                /* It also happens to ignore any number of '-' signs before the first number
-                 * (i.e. '------1' becomes '-1'). Beware that it was not intended to happen. */
                 if (lastTokenObject == null) {
                     if (SubtractExpression.EXPR_STR.equals(tokenStr)) {
+                        if (i != 0) {
+                            // More than two minus signs at the front of the statement.
+                            throw new IllegalStatementException("At token #" + i + ", illegal combination is found.");
+                        }
                         firstNumberIsNegative = true;
                         continue;
                     }
@@ -104,7 +105,7 @@ public class InputStatement {
                     throw new IllegalStatementException("At token #" + i + ", illegal symbol '" + tokenStr + "' found.");
                 }
 
-                if (lastTokenObject != null && lastTokenObject.isOperator()) {
+                if (lastTokenObject.isOperator()) {
                     throw new IllegalStatementException("At token #" + i + ", second consecutive operator '" + tokenStr + "' found. This is illegal.");
                 }
 
@@ -117,7 +118,11 @@ public class InputStatement {
         }
 
         if (processedTokens.isEmpty()) {
-            throw new IllegalStatementException("Input statement is empty.");
+            // Statement "-" (containing only one minus sign) will also trigger this exception.
+            throw new IllegalStatementException("Input statement was empty or was not a valid statement.");
+        }
+        if (lastTokenObject != null && lastTokenObject.isOperator()) {
+            throw new IllegalStatementException("Last token should be a number, not an operator.");
         }
 
         return this;
