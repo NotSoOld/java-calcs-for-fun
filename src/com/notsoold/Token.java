@@ -2,6 +2,9 @@ package com.notsoold;
 
 import com.notsoold.expression.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Token {
 
     private final Double doubleValue;
@@ -11,6 +14,10 @@ public class Token {
     public final static Token SUBT_EXPR_DUMMY = new Token(new SubtractExpression());
     public final static Token MULT_EXPR_DUMMY = new Token(new MultiplyExpression());
     public final static Token DIV_EXPR_DUMMY = new Token(new DivideExpression());
+
+    public final static List<Expression> AVAILABLE_EXPRESSIONS =
+                    Arrays.asList(ADD_EXPR_DUMMY.getExpression(), SUBT_EXPR_DUMMY.getExpression(),
+                                    MULT_EXPR_DUMMY.getExpression(), DIV_EXPR_DUMMY.getExpression());
 
     /* Only for dummies' construction. */
     private Token(Expression expression) {

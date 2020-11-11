@@ -87,21 +87,9 @@ public class InputStatement {
                     throw new IllegalStatementException("At token #" + i + ", first token should be a number.");
                 }
 
-                Expression currentTokenExpression;
-                switch (tokenStr) {
-                case AddExpression.EXPR_STR:
-                    currentTokenExpression = new AddExpression();
-                    break;
-                case SubtractExpression.EXPR_STR:
-                    currentTokenExpression = new SubtractExpression();
-                    break;
-                case MultiplyExpression.EXPR_STR:
-                    currentTokenExpression = new MultiplyExpression();
-                    break;
-                case DivideExpression.EXPR_STR:
-                    currentTokenExpression = new DivideExpression();
-                    break;
-                default:
+                Optional<Expression> currentTokenExpression =
+                                Token.AVAILABLE_EXPRESSIONS.stream().filter(expression -> expression.toString().equals(tokenStr)).findFirst();
+                if (!currentTokenExpression.isPresent()) {
                     throw new IllegalStatementException("At token #" + i + ", illegal symbol '" + tokenStr + "' found.");
                 }
 
@@ -110,7 +98,7 @@ public class InputStatement {
                 }
 
                 // Creating new expression token.
-                currentTokenObject = new Token.TokenBuilder().setExpression(currentTokenExpression).build();
+                currentTokenObject = new Token.TokenBuilder().setExpression(currentTokenExpression.get()).build();
             }
 
             processedTokens.add(currentTokenObject);
@@ -129,10 +117,7 @@ public class InputStatement {
     }
 
     private List<String> tokenize() {
-        userInput = Token.ADD_EXPR_DUMMY.getExpression().normalize(userInput);
-        userInput = Token.SUBT_EXPR_DUMMY.getExpression().normalize(userInput);
-        userInput = Token.MULT_EXPR_DUMMY.getExpression().normalize(userInput);
-        userInput = Token.DIV_EXPR_DUMMY.getExpression().normalize(userInput);
+        Token.AVAILABLE_EXPRESSIONS.forEach(expression -> userInput = expression.normalize(userInput));
 
         return Stream.of(userInput.split(" ")).filter(tok -> !tok.isEmpty()).collect(Collectors.toList());
     }
